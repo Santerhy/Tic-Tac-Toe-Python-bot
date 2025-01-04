@@ -15,6 +15,7 @@ winX = []
 winY = []
 board = []
 
+#Print board with evaluated values
 def printMatrix(matrix):
     for y in range(len(matrix)):
         s = ""
@@ -38,13 +39,13 @@ def PlayerTurn(buttonY, buttonX):
         else:
             BotTurn()
 
+#Check for winner
 def DeeperCheck(startY, startX, symbol, symbolCount, yDirection, xDirection):
     #Check surrounding tiles
     if symbolCount == 1:
         for y in range(-1, 2):
             for x in range(-1, 2):
                 if not(x == 0 and y == 0):
-                    #print("Checking for [" + str(startX + x + 1) + "][" + str(startY + y + 1) + "]")
                     #Check if coordinates are still inbound
                     if (startX + x >= 0) and (startY + y >= 0) and (startX + x < len(board)) and (startY + y < len(board)):
                         if board[startY + y][startX + x].cget('text') == symbol:
@@ -53,7 +54,6 @@ def DeeperCheck(startY, startX, symbol, symbolCount, yDirection, xDirection):
         return False
     else:
         if (startX + xDirection >= 0) and (startY + yDirection >= 0) and (startX + xDirection < len(board)) and (startY + yDirection < len(board)):
-            #print("Symbolcount " + str(symbolCount))
             if board[startY + yDirection][startX + xDirection].cget('text') == symbol:
                 if (symbolCount + 1 < streakToWin):
                     return DeeperCheck(startY + yDirection, startX + xDirection, symbol, symbolCount + 1, yDirection, xDirection)
@@ -102,12 +102,6 @@ def BotTurn():
     board[tileChosen._y][tileChosen._x].config(text= "O")
     print("Took tile: " + str(tileChosen._y) + ", " + str(tileChosen._x))
 
-    #while True:
-    #    y = random.randrange(0, len(board))
-    #    x = random.randrange(0, len(board))
-    #    if board[y][x].cget('text') == "":
-    #        board[y][x].config(text="O")
-    #        break
     if CheckWinner("O"):
         EndGame("O")
     elif CheckBoardStatus():
@@ -166,6 +160,7 @@ def CheckWinner(symbol):
                 if DeeperCheck(y, x, symbol, 1, 0, 0):
                     return True
 
+#Rows/columns in line needed to win
 def SetWinStreak(rcount):
     global streakToWin
     if rcount < 5:
@@ -177,6 +172,7 @@ def SetWinStreak(rcount):
     else:
         streakToWin = rcount / 2
 
+#Check if board is full
 def CheckBoardStatus():
     for y in range(len(board)):
         for x in range(len(board)):
