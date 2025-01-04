@@ -1,3 +1,4 @@
+
 import random
 from tkinter import*
 from tkinter.constants import DISABLED, NORMAL
@@ -9,9 +10,10 @@ class BotTile:
         self._x = _x
         self._y = _y
 
-board = []
+
 winX = []
 winY = []
+board = []
 
 def printMatrix(matrix):
     for y in range(len(matrix)):
@@ -19,6 +21,48 @@ def printMatrix(matrix):
         for x in range(len(matrix)):
             s += str(matrix[y][x]) + ", "
         print(s + "\n")
+
+
+
+
+
+def PlayerTurn(buttonY, buttonX):
+    print(str(buttonY) + ", " + str(buttonX))
+    if board[buttonY][buttonX].cget('text') == "":
+        board[buttonY][buttonX].config(text="X")
+        window.update()
+        if CheckWinner("X"):
+            EndGame("X")
+        elif CheckBoardStatus():
+            EndGame("T")
+        else:
+            BotTurn()
+
+def DeeperCheck(startY, startX, symbol, symbolCount, yDirection, xDirection):
+    #Check surrounding tiles
+    if symbolCount == 1:
+        for y in range(-1, 2):
+            for x in range(-1, 2):
+                if not(x == 0 and y == 0):
+                    #print("Checking for [" + str(startX + x + 1) + "][" + str(startY + y + 1) + "]")
+                    #Check if coordinates are still inbound
+                    if (startX + x >= 0) and (startY + y >= 0) and (startX + x < len(board)) and (startY + y < len(board)):
+                        if board[startY + y][startX + x].cget('text') == symbol:
+                            if DeeperCheck(startY + y, startX + x, symbol, symbolCount + 1, y, x):
+                                return True
+        return False
+    else:
+        if (startX + xDirection >= 0) and (startY + yDirection >= 0) and (startX + xDirection < len(board)) and (startY + yDirection < len(board)):
+            #print("Symbolcount " + str(symbolCount))
+            if board[startY + yDirection][startX + xDirection].cget('text') == symbol:
+                if (symbolCount + 1 < streakToWin):
+                    return DeeperCheck(startY + yDirection, startX + xDirection, symbol, symbolCount + 1, yDirection, xDirection)
+                else:
+                    SetWinTiles(startX, xDirection, startY, yDirection)
+                    return True
+            else:
+                return False
+    return False
 
 def BotTurn():
     tempBoard = []
@@ -102,44 +146,6 @@ def botPositionReevaluate(score):
         case _:
             return score
 
-def PlayerTurn(buttonY, buttonX):
-    print(str(buttonY) + ", " + str(buttonX))
-    if board[buttonY][buttonX].cget('text') == "":
-        board[buttonY][buttonX].config(text="X")
-        window.update()
-        if CheckWinner("X"):
-            EndGame("X")
-        elif CheckBoardStatus():
-            EndGame("T")
-        else:
-            BotTurn()
-
-def DeeperCheck(startY, startX, symbol, symbolCount, yDirection, xDirection):
-    #Check surrounding tiles
-    if symbolCount == 1:
-        for y in range(-1, 2):
-            for x in range(-1, 2):
-                if not(x == 0 and y == 0):
-                    #print("Checking for [" + str(startX + x + 1) + "][" + str(startY + y + 1) + "]")
-                    #Check if coordinates are still inbound
-                    if (startX + x >= 0) and (startY + y >= 0) and (startX + x < len(board)) and (startY + y < len(board)):
-                        if board[startY + y][startX + x].cget('text') == symbol:
-                            if DeeperCheck(startY + y, startX + x, symbol, symbolCount + 1, y, x):
-                                return True
-        return False
-    else:
-        if (startX + xDirection >= 0) and (startY + yDirection >= 0) and (startX + xDirection < len(board)) and (startY + yDirection < len(board)):
-            #print("Symbolcount " + str(symbolCount))
-            if board[startY + yDirection][startX + xDirection].cget('text') == symbol:
-                if (symbolCount + 1 < streakToWin):
-                    return DeeperCheck(startY + yDirection, startX + xDirection, symbol, symbolCount + 1, yDirection, xDirection)
-                else:
-                    SetWinTiles(startX, xDirection, startY, yDirection)
-                    return True
-            else:
-                return False
-    return False
-
 def SetWinTiles(startX, xDirection, startY, yDirection):
     startX += xDirection
     startY += yDirection
@@ -179,7 +185,7 @@ def CheckBoardStatus():
     return True
 
 def InitializeBoard(size):
-    global rowcount
+    global rowcount, board
     if size == -100:
         try:
             rowcount = int(customSizeEntry.get())
